@@ -6,13 +6,13 @@ services:
     env_file:
       - .env
     volumes:
-      - .:/app  # پوشه پروژه روی سیستم میزبان به داخل کانتینر متصل می‌شود
-      - ./data:/app/data  # این خط باعث می‌شود پوشه 'data' روی میزبان به کانتینر متصل شود
+      - .:/app  
+      - ./data:/app/data  
     networks:
       - bot-network
     restart: always
     ports:
-      - "8000:8000"  # اگر نیاز به پورت خاصی دارید، این را تنظیم کنید
+      - "8000:8000"  
 
 networks:
   bot-network:
