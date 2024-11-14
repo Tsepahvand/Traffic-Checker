@@ -1,8 +1,19 @@
-version: '3'
+version: "3.8"
 services:
-  telegram_bot:
+  bot:
     build: .
-    env_file: .env
+    container_name: telegram-bot
+    env_file:
+      - .env
     volumes:
-      - ./users.db:/app/users.db  # نگهداری دیتابیس SQLite در خارج از کانتینر
-    restart: unless-stopped
+      - .:/app  # پوشه پروژه روی سیستم میزبان به داخل کانتینر متصل می‌شود
+      - ./data:/app/data  # این خط باعث می‌شود پوشه 'data' روی میزبان به کانتینر متصل شود
+    networks:
+      - bot-network
+    restart: always
+    ports:
+      - "8000:8000"  # اگر نیاز به پورت خاصی دارید، این را تنظیم کنید
+
+networks:
+  bot-network:
+    driver: bridge
