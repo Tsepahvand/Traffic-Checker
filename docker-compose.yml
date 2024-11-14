@@ -1,0 +1,8 @@
+version: '3'
+services:
+  telegram_bot:
+    build: .
+    env_file: .env
+    volumes:
+      - ./users.db:/app/users.db  # نگهداری دیتابیس SQLite در خارج از کانتینر
+    restart: unless-stopped
