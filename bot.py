@@ -13,10 +13,8 @@ token = os.getenv('BOT_TOKEN')
 
 logging.basicConfig(filename='log.log', filemode='a', level=logging.INFO, format='%(asctime)s-%(filename)s-%(message)s')
 
-# مراحل برای ConversationHandler
 FIRST = range(1)
 
-# ایجاد دیتابیس
 def create_database():
     connection = sqlite3.connect("users.db")
     cursor = connection.cursor()
@@ -39,18 +37,22 @@ def create_database():
 # پیام‌ها
 messages = {
     'msg-main-menu': 'منوی اصلی',
-    'msg-help': 'سلام به کانفیگ چکر خوش اومدید...',
+    'msg-help': ' سلام به کانفیگ چکر خوش اومدید\nبا زدن روی بررسی کانفیگ و بعد نوشتن اسم کانفیگتون\n  از اطلاعات اون مطلع شوید',
     'btn-check': 'بررسی کانفیگ',
     'btn-help': 'راهنمایی',
     'btn-return': 'بازگشت به منوی اصلی',
 }
 
-# عملکرد شروع
 def start_handler(update: Update, context: CallbackContext):
     chat_id = update.message.chat_id
     first_name = update.message.chat.first_name
     last_name = update.message.chat.last_name
-    update.message.reply_text(f'سلام {first_name} {last_name}\nبه ربات چک کردن حجم خوش آمدید')
+    if not last_name:
+        format_name = (first_name, ' ')
+    else:
+        format_name = (first_name, last_name)
+
+    update.message.reply_text(f'سلام {format_name[0]} {format_name[1]} \n به ربات چک کردن حجم خوش آمدید'.format(first_name,last_name))
     main_menu_handler(update, context)
 
 # منوی اصلی
@@ -64,12 +66,10 @@ def main_menu_handler(update: Update, context: CallbackContext):
         reply_markup=ReplyKeyboardMarkup(buttons, resize_keyboard=True)
     )
 
-# شروع بررسی کانفیگ
 def check_handler(update: Update, context: CallbackContext):
     update.message.reply_text("لطفاً نام کانفیگ را وارد کنید:")
     return FIRST
 
-# دریافت نام کانفیگ
 def get_client_name(update: Update, context: CallbackContext):
     client_name = update.message.text.strip().upper()  
     perform_check(client_name, update, context)
@@ -138,7 +138,6 @@ def perform_check(client_name, update: Update, context: CallbackContext):
     else:
         update.message.reply_text("خطا در برقراری ارتباط با سرور. لطفاً دوباره تلاش کنید.")
 
-# ذخیره اطلاعات کاربر
 def save_user_info(chat_id, username, client_name):
     connection = sqlite3.connect("users.db")
     cursor = connection.cursor()
@@ -147,11 +146,9 @@ def save_user_info(chat_id, username, client_name):
     connection.commit()
     connection.close()
 
-# دستورات راهنما
 def help_handler(update: Update, context: CallbackContext):
     update.message.reply_text(messages['msg-help'])
 
-# تابع اصلی
 def main():
     create_database()
 
