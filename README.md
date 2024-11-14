@@ -11,6 +11,8 @@
 - **بررسی حجم مصرفی**: نمایش حجم کل، حجم مصرف شده و حجم باقی‌مانده.
 - **وضعیت کانفیگ**: نمایش وضعیت فعال یا غیرفعال بودن کانفیگ.
 - **تاریخ انقضا**: نمایش تاریخ انقضای کانفیگ.
+- ![نمونه تصویر](https://github.com/Tsepahvand/Traffic-Checker/blob/main/example.png?raw=true)
+
 
 ---
 
@@ -37,13 +39,13 @@ PANEL_PASSWORD= رمز ورود به پنل
 ```
 نکته: آدرس پنل را باید به یکی از شکل‌های زیر وارد کنید:
 
-`https://localhost:port/path` •
+• `https://localhost:port/path` 
 
-`https://localhost:port` •
+• `https://localhost:port` 
 
-`http://localhost:port/path` •
+• `http://localhost:port/path` 
 
-`http://localhost:port` •
+• `http://localhost:port`
 
 پس از ویرایش و ذخیره فایل .env، با استفاده از دستور زیر کانتینر داکر را بسازید و اجرا کنید:
 
