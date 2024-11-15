@@ -125,7 +125,7 @@ def perform_check(client_name, update: Update, context: CallbackContext):
                     total_percent = ((config_totaltraffic_gb - total_data_mb) / config_totaltraffic_gb) * 100
                     progress_bar_length = 10
                     num_blocks = int(progress_bar_length * total_percent / 100)
-                    progress_bar = "✅" * num_blocks + "❌" * (progress_bar_length - num_blocks)
+                    progress_bar = "█" * num_blocks + "░" * (progress_bar_length - num_blocks)
 
                     acc_info = f"اسم کانفیگ : {config_name}\nوضعیت کانفیگ : {acc_mode}\nحجم کل : {config_totaltraffic_gb:.2f}  گیگابایت\nحجم مصرف شده : {total_data_mb:.2f}  گیگابایت\nحجم باقی مانده : {total_data_reming:.2f}  گیگابایت\nحجم باقی مانده به درصد  :  \n {progress_bar} {round(total_percent)}%\nتاریخ انقضا : {expiry_info}"
                     update.message.reply_text(acc_info)
