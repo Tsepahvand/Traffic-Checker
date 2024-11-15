@@ -11,7 +11,7 @@
 - **بررسی حجم مصرفی**: نمایش حجم کل، حجم مصرف شده و حجم باقی‌مانده.
 - **وضعیت کانفیگ**: نمایش وضعیت فعال یا غیرفعال بودن کانفیگ.
 - **تاریخ انقضا**: نمایش تاریخ انقضای کانفیگ.
-- ![نمونه تصویر](https://github.com/Tsepahvand/Traffic-Checker/blob/main/example.png?raw=true)
+- ![نمونه کار](https://github.com/Tsepahvand/Traffic-Checker/blob/main/example.png?raw=true)
 
 
 ---
