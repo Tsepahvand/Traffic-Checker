@@ -109,7 +109,6 @@ def perform_check(client_name, update: Update, context: CallbackContext):
                     return  
 
                 if 'obj' in client_data:
-                    save_user_info(chat_id, update.message.chat.username, client_name)
                     acc_mode = 'فعال' if client_data['obj'].get('enable') else 'غیر فعال'
                     total_data = client_data['obj'].get('up', 0) + client_data['obj'].get('down', 0)
                     config_expirytime = client_data['obj'].get('expiryTime')
@@ -119,15 +118,37 @@ def perform_check(client_name, update: Update, context: CallbackContext):
                     expiry_info = "نامحدود" if config_expirytime == 0 else jdatetime.datetime.fromtimestamp(config_expirytime / 1000).strftime('%d-%m-%Y')
 
                     config_totaltraffic_gb = config_totaltraffic / (1024 * 1024 * 1024)
-                    total_data_mb = total_data / (1024 * 1024 * 1024)
-                    total_data_reming = config_totaltraffic_gb - (total_data / (1024 * 1024 * 1024))
+                    
+                    if config_totaltraffic_gb == 0:  
+                        config_totaltraffic_gb = 'نامحدود'
+                        total_data_mb = total_data / (1024 * 1024 * 1024)  
+                        total_data_reming = 'نامحدود'
+                        total_percent = None
+                        progress_bar = "نامحدود"
+                    else:  
+                        total_data_mb = total_data / (1024 * 1024 * 1024)
+                        total_data_reming = config_totaltraffic_gb - total_data_mb
+                        total_percent = ((config_totaltraffic_gb - total_data_mb) / config_totaltraffic_gb) * 100
+                        progress_bar_length = 10
+                        num_blocks = int(progress_bar_length * total_percent / 100)
+                        progress_bar = "█" * num_blocks + "░" * (progress_bar_length - num_blocks)
 
-                    total_percent = ((config_totaltraffic_gb - total_data_mb) / config_totaltraffic_gb) * 100
-                    progress_bar_length = 10
-                    num_blocks = int(progress_bar_length * total_percent / 100)
-                    progress_bar = "█" * num_blocks + "░" * (progress_bar_length - num_blocks)
+                    #  پیام خروجی
+                    acc_info = f"اسم کانفیگ : {config_name}\nوضعیت کانفیگ : {acc_mode}\n"
 
-                    acc_info = f"اسم کانفیگ : {config_name}\nوضعیت کانفیگ : {acc_mode}\nحجم کل : {config_totaltraffic_gb:.2f}  گیگابایت\nحجم مصرف شده : {total_data_mb:.2f}  گیگابایت\nحجم باقی مانده : {total_data_reming:.2f}  گیگابایت\nحجم باقی مانده به درصد  :  \n {progress_bar} {round(total_percent)}%\nتاریخ انقضا : {expiry_info}"
+                    if config_totaltraffic_gb == 'نامحدود':
+                        acc_info += f"حجم کل : {config_totaltraffic_gb}\n"
+                        acc_info += f"حجم باقی مانده : {total_data_reming}\n"
+                        acc_info += f"حجم مصرف شده : {total_data_mb:.2f} گیگابایت\n"
+                    else:
+                        acc_info += f"حجم کل : {config_totaltraffic_gb:.2f}  گیگابایت\n"
+                        acc_info += f"حجم باقی مانده : {total_data_reming:.2f}  گیگابایت\n"
+                        acc_info += f"حجم مصرف شده : {total_data_mb:.2f} گیگابایت\n"
+
+                    if total_percent is not None:
+                        acc_info += f"حجم باقی مانده به درصد :\n {progress_bar} {round(total_percent)}%\n"
+
+                    acc_info += f"تاریخ انقضا : {expiry_info}"
                     update.message.reply_text(acc_info)
                 else:
                     update.message.reply_text("اطلاعاتی برای این کانفیگ پیدا نشد.")
