@@ -57,5 +57,5 @@ docker-compose up --build -d
 
 اگر نام کانفیگ های شما شامل حروف کوچک یا ترکیبی از حروف کوچک و بزرگ است، لطفاً خط 74 فایل bot.py را به شکل زیر تغییر دهید تا به درستی کار کند:
 ```python
-client_name = update.message.text
+client_name = update.message.text.strip()
 ```
