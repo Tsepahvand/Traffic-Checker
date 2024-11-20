@@ -3,17 +3,14 @@ services:
   bot:
     build: .
     container_name: telegram-bot
-    env_file:
-      - .env
     volumes:
-      - .:/app  
+      - .:/app
       - ./data:/app/data  
     networks:
       - bot-network
     restart: always
     ports:
       - "8000:8000"  
-
 networks:
   bot-network:
     driver: bridge
