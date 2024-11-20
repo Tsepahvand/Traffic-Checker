@@ -11,7 +11,11 @@ from datetime import datetime, timedelta
 
 logging.basicConfig(filename='log.log', filemode='a', level=logging.INFO, format='%(asctime)s-%(filename)s-%(message)s')
 
+
+
 FIRST, SECOND , REMOVE_ADMIN, REMOVE_PANEL, CHANGE_OWNER = range(5)
+
+
 
 def get_db_connection():
     return sqlite3.connect("detail.db")
@@ -82,7 +86,6 @@ def get_panels():
     panels = cursor.fetchall()
     connection.close()
     return panels
-
 
 def get_owner():
     connection = get_db_connection()
@@ -187,10 +190,7 @@ def admin_menu_handler(update: Update, context: CallbackContext):
 
     
 
-    update.message.reply_text(
-        text=messages['msg-main-menu'],
-        reply_markup=ReplyKeyboardMarkup(buttons, resize_keyboard=True)
-    )
+
 
 
 
