@@ -433,7 +433,7 @@ def save_panel(update: Update, context: CallbackContext):
         update.message.reply_text("پنل با موفقیت اضافه شد.")
     except ValueError:
         update.message.reply_text("فرمت وارد شده صحیح نیست. لطفاً دوباره تلاش کنید.")
-        return FIRST  # کاربر را به همان مرحله برگردانید تا دوباره تلاش کند
+        return FIRST  
     return ConversationHandler.END
 
 def cancel(update: Update, context: CallbackContext):
