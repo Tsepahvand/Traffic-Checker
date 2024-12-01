@@ -3,7 +3,7 @@
 GREEN="\033[0;32m"
 RED="\033[0;31m"
 YELLOW="\033[0;33m"
-NC="\033[0m" 
+NC="\033[0m"
 
 print_success() {
     echo -e "${GREEN}$1${NC}"
@@ -27,17 +27,6 @@ loading_animation() {
     echo ""
 }
 
-# 1. دانلود pip در صورتی که نصب نباشد
-loading_animation "Checking if pip is installed"
-if ! [ -x "$(command -v pip)" ]; then
-    print_warning "pip is not installed. Installing..."
-    apt-get update
-    apt-get install -y python3-pip
-else
-    print_success "pip is already installed."
-fi
-
-# 2. بررسی و نصب figlet
 if ! [ -x "$(command -v figlet)" ]; then
     print_warning "Figlet is not installed. Installing..."
     apt-get update
@@ -57,44 +46,34 @@ git clone "$REPO_URL" || { print_error "Failed to clone the repository."; exit 1
 
 cd Traffic-Checker || { print_error "Failed to enter the repository directory."; exit 1; }
 
-loading_animation "Checking if Docker Compose is up-to-date"
-apt-get install -y docker-compose || { print_error "Failed to update Docker Compose."; exit 1; }
-print_success "Docker Compose is up-to-date."
-
-read -p "What is your panel type Sanaei or Alireza? (s/a): " panel_type
-
-if [[ "$panel_type" == "s" || "$panel_type" == "S" ]]; then
-    print_success "Panel type is Sanaei."
-else
-    if [[ "$panel_type" == "a" || "$panel_type" == "A" ]]; then
-        print_success "Panel type is Alireza. Modifying bot.py..."
-        sed -i 's|get_client_endpoint = "/panel/api/inbounds/getClientTraffics/"|get_client_endpoint = "/xui/API/inbounds/getClientTraffics/"|g' bot.py
-        print_success "Line 262 in bot.py has been modified."
-    else
-        print_error "Invalid panel type entered. Exiting."
-        exit 1
-    fi
-fi
-
-read -p "Do you want to convert client names to uppercase (yes/no)? " response
-
-
-if [[ "$response" == "yes" || "$response" == "y" ]]; then
-    print_success "Client names will be converted to uppercase."
-else
-    print_warning "Client names will not be converted to uppercase. Modifying bot.py..."
-
-
-    sed -i 's/client_name = update.message.text.strip().upper()/client_name = update.message.text.strip()/g' bot.py
-    print_success "Line 250 in bot.py has been modified."
-fi
-
-
 if [ -f "requirements.txt" ]; then
     print_warning "Installing dependencies from requirements.txt..."
     pip install -r requirements.txt || { print_error "Failed to install dependencies."; exit 1; }
 else
     print_warning "No requirements.txt found, skipping dependency installation."
+fi
+
+read -p "What is your panel type Sanaei or Alireza? (s/a): " panel_type
+
+if [[ "$panel_type" == "s" || "$panel_type" == "S" ]]; then
+    print_success "Panel type is Sanaei."
+elif [[ "$panel_type" == "a" || "$panel_type" == "A" ]]; then
+    print_success "Panel type is Alireza. Modifying bot.py..."
+    sed -i 's|get_client_endpoint = "/panel/api/inbounds/getClientTraffics/"|get_client_endpoint = "/xui/API/inbounds/getClientTraffics/"|g' bot.py
+    print_success "Line 262 in bot.py has been modified."
+else
+    print_error "Invalid panel type entered. Exiting."
+    exit 1
+fi
+
+read -p "Do you want to convert client names to uppercase (yes/no)? " response
+
+if [[ "$response" == "yes" || "$response" == "y" ]]; then
+    print_success "Client names will be converted to uppercase."
+else
+    print_warning "Client names will not be converted to uppercase. Modifying bot.py..."
+    sed -i 's/client_name = update.message.text.strip().upper()/client_name = update.message.text.strip()/g' bot.py
+    print_success "Line 250 in bot.py has been modified."
 fi
 
 loading_animation "Checking if Docker is installed"
@@ -104,6 +83,14 @@ if ! [ -x "$(command -v docker)" ]; then
     apt-get install -y docker.io
 else
     print_success "Docker is already installed."
+fi
+
+loading_animation "Checking if Docker Compose is installed"
+if ! [ -x "$(command -v docker-compose)" ]; then
+    print_warning "Docker Compose is not installed. Installing..."
+    apt-get install -y docker-compose
+else
+    print_success "Docker Compose is already installed."
 fi
 
 loading_animation "Checking if SQLite is installed"
@@ -131,9 +118,6 @@ fi
 read -p "Enter the bot token: " bot_token
 read -p "Enter the owner ID: " owner_id
 
-bot_token=$(echo "$bot_token" | tr -d -c '[:print:]')
-owner_id=$(echo "$owner_id" | tr -d -c '[:digit:]')
-
 if [[ -z "$bot_token" || -z "$owner_id" || ! "$owner_id" =~ ^[0-9]+$ ]]; then
     print_error "Invalid input. Please ensure the bot token and owner ID are correct."
     exit 1
@@ -160,4 +144,6 @@ fi
 
 print_success "Running WebUI and Uvicorn..."
 nohup python3 webUI.py &  
-nohup uvicorn app:app --port 7386 &  
+nohup uvicorn app:app --port 7386 &
+
+print_success "Setup complete!"
