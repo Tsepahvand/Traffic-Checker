@@ -131,6 +131,9 @@ fi
 read -p "Enter the bot token: " bot_token
 read -p "Enter the owner ID: " owner_id
 
+bot_token=$(echo "$bot_token" | tr -d -c '[:print:]')
+owner_id=$(echo "$owner_id" | tr -d -c '[:digit:]')
+
 if [[ -z "$bot_token" || -z "$owner_id" || ! "$owner_id" =~ ^[0-9]+$ ]]; then
     print_error "Invalid input. Please ensure the bot token and owner ID are correct."
     exit 1
