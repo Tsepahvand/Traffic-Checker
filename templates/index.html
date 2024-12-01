@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ translations['data_for'] }} {{ email }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body class="dark-mode">
+    <div class="container">
+        <div class="language-toggle">
+            <label class="switch">
+                <input type="checkbox" onchange="location = this.checked ? '{{ url_for('index', email_id=email, lang='fa') }}' : '{{ url_for('index', email_id=email, lang='en') }}'" {{ 'checked' if lang == 'fa' else '' }}>
+                <span class="slider"></span>
+            </label>
+            <span class="lang-text">{{ 'فارسی' if lang == 'fa' else 'English' }}</span>
+        </div>
+
+        <h1>{{ translations['data_for'] }} {{ email }}</h1>
+
+        <div class="percentage-bar-container">
+            <div class="percentage-bar">
+                <div class="percentage">{{ acc_mode }}</div>
+            </div>
+            <div class="percentage-bar">
+                <div class="percentage">{{ first_percent }}</div>
+            </div>
+            <div class="percentage-bar">
+                <div class="percentage">{{ second_percent }}</div>
+            </div>
+            <div class="percentage-bar">
+                <div class="percentage">{{ forth_percent }}</div>
+            </div>
+            <div class="percentage-bar">
+                <div class="percentage">{{ third_percent }}</div>
+            </div>
+        </div>
+
+        <div class="back-to-home">
+            <a href="{{ url_for('home', email_id=email, lang=lang) }}" class="back-button">{{ translations['back_to_home'] }}</a>
+        </div>
+
+        <div class="mode-toggle">
+            <label class="switch-mode">
+                <input type="checkbox" id="mode-toggle" onchange="toggleMode()" checked>
+                <span class="slider-mode"></span>
+            </label>
+            <span class="lang-text">{{ 'Dark Mode' if lang == 'en' else 'حالت شب' }}</span>
+        </div>
+    </div>
+
+    <script>
+        function toggleMode() {
+            const body = document.body;
+            const container = document.querySelector('.container');
+
+            if (body.classList.contains('dark-mode')) {
+                body.classList.replace('dark-mode', 'light-mode');
+                container.classList.replace('dark-mode', 'light-mode');
+            } else {
+                body.classList.replace('light-mode', 'dark-mode');
+                container.classList.replace('light-mode', 'dark-mode');
+            }
+        }
+    </script>
+</body>
+</html>
