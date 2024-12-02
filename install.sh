@@ -79,7 +79,6 @@ if [ -z "$webui_port" ]; then
 fi
 print_info "Modifying webUI.py file..."
 sed -i "s|app.run(debug=True, host='0.0.0.0', port=5000)|app.run(debug=True, host='0.0.0.0', port=$webui_port)|g" webUI.py
-fi
 
 print_info "Checking if Docker is installed..."
 if ! command -v docker &> /dev/null; then
