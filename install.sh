@@ -1,131 +1,126 @@
 #!/bin/bash
 
-GREEN="\033[0;32m"
-RED="\033[0;31m"
-YELLOW="\033[0;33m"
-NC="\033[0m" 
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+BLUE='\033[0;34m'
+RESET='\033[0m'
 
 print_success() {
-    echo -e "${GREEN}$1${NC}"
+    echo -e "${GREEN}$1${RESET}"
 }
 
 print_error() {
-    echo -e "${RED}$1${NC}"
+    echo -e "${RED}$1${RESET}"
 }
 
 print_warning() {
-    echo -e "${YELLOW}$1${NC}"
+    echo -e "${YELLOW}$1${RESET}"
 }
 
-loading_animation() {
-    local -r msg=$1
-    echo -n "$msg"
-    for i in {1..5}; do
-        echo -n "."
-        sleep 0.5
-    done
-    echo ""
+print_info() {
+    echo -e "${BLUE}$1${RESET}"
 }
 
-if ! [ -x "$(command -v figlet)" ]; then
-    print_warning "Figlet is not installed. Installing..."
-    apt-get update
-    apt-get install -y figlet
+print_info "Checking if figlet is installed..."
+if ! command -v figlet &> /dev/null; then
+    print_warning "figlet is not installed. Installing..."
+    sudo apt-get install -y figlet
 else
-    print_success "Figlet is already installed."
+    print_success "figlet is already installed."
 fi
 
-clear
-echo -e "${GREEN}"
-figlet "TRAFFIC VIEWER" 
-echo -e "${NC}"
+print_info "Checking if pip is installed..."
+if ! command -v pip &> /dev/null; then
+    print_warning "pip is not installed. Installing..."
+    sudo apt-get install -y python3-pip
+else
+    print_success "pip is already installed."
+fi
 
-REPO_URL="https://github.com/Tsepahvand/Traffic-Checker.git"
-print_warning "Cloning the repository from $REPO_URL..."
-git clone "$REPO_URL" || { print_error "Failed to clone the repository."; exit 1; }
+figlet "TRAFFIC VIEWER"
 
-cd Traffic-Checker || { print_error "Failed to enter the repository directory."; exit 1; }
+REPO_DIR="Traffic-Checker"
+if [ -d "$REPO_DIR" ]; then
+    print_warning "Repository already exists. Cleaning up and cloning again..."
+    rm -rf "$REPO_DIR"
+fi
 
+print_info "Cloning GitHub repository..."
+git clone https://github.com/Tsepahvand/Traffic-Checker.git
+
+cd "$REPO_DIR"
 if [ -f "requirements.txt" ]; then
-    print_warning "Installing dependencies from requirements.txt..."
-    pip install -r requirements.txt || { print_error "Failed to install dependencies."; exit 1; }
+    print_info "Installing dependencies from requirements.txt..."
+    pip install -r requirements.txt
 else
-    print_warning "No requirements.txt found, skipping dependency installation."
+    print_warning "requirements.txt not found!"
 fi
 
+read -p "Do you want to convert client names to uppercase? (yes/no): " convert_to_upper
+if [[ "$convert_to_upper" == "no" || "$convert_to_upper" == "n" || "$convert_to_upper" == "NO" || "$convert_to_upper" == "N" || "$convert_to_upper" == "No" ]]; then
+    print_info "Modifying bot.py file..."
+    sed -i "s/update.message.text.strip().upper()/update.message.text.strip()/g" bot.py
 
-read -p "Do you want to convert client names to uppercase (yes/no)? " response
+    print_info "Modifying app.py file..."
+    sed -i "s/Client = Client.upper()/Client = Client/g" app.py
 
+    read -p "What is your panel type, Sanaei or Alireza? (S/A): " panel_type
+    if [[ "$panel_type" =~ ^(a|A|alireza|Alireza)$ ]]; then
+        print_info "Modifying bot.py and app.py files..."
+        sed -i "s|get_client_endpoint = \"/panel/api/inbounds/getClientTraffics/\"|get_client_endpoint = \"/xui/API/inbounds/getClientTraffics/\"|g" bot.py
+        sed -i "s|get_client_endpoint = \"/panel/api/inbounds/getClientTraffics/\"|get_client_endpoint = \"/xui/API/inbounds/getClientTraffics/\"|g" app.py
+    fi
 
-if [[ "$response" == "yes" || "$response" == "y" ]]; then
-    print_success "Client names will be converted to uppercase."
-else
-    print_warning "Client names will not be converted to uppercase. Modifying bot.py..."
-
-
-    sed -i 's/client_name = update.message.text.strip().upper()/client_name = update.message.text.strip()/g' bot.py
-    print_success "Line 250 in bot.py has been modified."
+    read -p "Enter the WebUI port (default 5000): " webui_port
+    if [ -z "$webui_port" ]; then
+        webui_port=5000
+    fi
+    print_info "Modifying webUI.py file..."
+    sed -i "s|app.run(debug=True, host='0.0.0.0', port=5000)|app.run(debug=True, host='0.0.0.0', port=$webui_port)|g" webUI.py
 fi
 
-
-loading_animation "Checking if Docker is installed"
-if ! [ -x "$(command -v docker)" ]; then
+print_info "Checking if Docker is installed..."
+if ! command -v docker &> /dev/null; then
     print_warning "Docker is not installed. Installing..."
-    apt-get update
-    apt-get install -y docker.io
+    sudo apt-get install -y docker.io
 else
     print_success "Docker is already installed."
 fi
 
-
-loading_animation "Checking if Docker Compose is installed"
-if ! [ -x "$(command -v docker-compose)" ]; then
+print_info "Checking if Docker Compose is installed..."
+if ! command -v docker-compose &> /dev/null; then
     print_warning "Docker Compose is not installed. Installing..."
-    apt-get install -y docker-compose
+    sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+    sudo chmod +x /usr/local/bin/docker-compose
 else
     print_success "Docker Compose is already installed."
+    print_info "Updating Docker Compose..."
+    sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+    sudo chmod +x /usr/local/bin/docker-compose
 fi
 
-
-loading_animation "Checking if SQLite is installed"
-if ! [ -x "$(command -v sqlite3)" ]; then
+print_info "Checking if SQLite is installed..."
+if ! command -v sqlite3 &> /dev/null; then
     print_warning "SQLite is not installed. Installing..."
-    apt-get install -y sqlite3
+    sudo apt-get install -y sqlite3
 else
     print_success "SQLite is already installed."
 fi
 
+print_info "Checking and creating SQLite database..."
+sqlite3 detail.db "CREATE TABLE IF NOT EXISTS settings (id INTEGER PRIMARY KEY, token TEXT, owner_id INTEGER);"
 
-DB_PATH="detail.db"
-if [ ! -f "$DB_PATH" ]; then
-    print_success "Database $DB_PATH created."
-    sqlite3 "$DB_PATH" <<EOF
-CREATE TABLE IF NOT EXISTS settings (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    token TEXT NOT NULL,
-    owner_id INTEGER NOT NULL
-);
-EOF
-else
-    print_success "Database $DB_PATH already exists."
-fi
-
-
-read -p "Enter the bot token: " bot_token
+read -p "Enter your bot token: " bot_token
 read -p "Enter the owner ID: " owner_id
 
+sqlite3 detail.db "INSERT INTO settings (token, owner_id) VALUES ('$bot_token', '$owner_id');"
 
-if [[ -z "$bot_token" || -z "$owner_id" || ! "$owner_id" =~ ^[0-9]+$ ]]; then
-    print_error "Invalid input. Please ensure the bot token and owner ID are correct."
-    exit 1
-fi
+print_info "Starting the bot with Docker Compose..."
+docker-compose up --build -d
 
+print_info "Starting API and webUI..."
+nohup python3 webUI.py &
+nohup uvicorn app:app --port 7386 &
 
-sqlite3 "$DB_PATH" <<EOF
-INSERT INTO settings (token, owner_id) VALUES ('$bot_token', $owner_id);
-EOF
-print_success "Information saved."
-
-
-loading_animation "Running the bot with Docker Compose"
-docker-compose up --build -d || { print_error "Docker Compose failed to start."; exit 1; }
+print_success "Script executed successfully!"
