@@ -64,18 +64,18 @@ if [[ "$convert_to_upper" == "no" || "$convert_to_upper" == "n" || "$convert_to_
 
     print_info "Modifying app.py file..."
     sed -i "s/Client = Client.upper()/Client = Client/g" app.py
-fi
+fi  
 
 read -p "What is your panel type, Sanaei or Alireza? (S/A): " panel_type
 if [[ "$panel_type" =~ ^(a|A|alireza|Alireza)$ ]]; then
     print_info "Modifying bot.py and app.py files..."
     sed -i "s|get_client_endpoint = \"/panel/api/inbounds/getClientTraffics/\"|get_client_endpoint = \"/xui/API/inbounds/getClientTraffics/\"|g" bot.py
     sed -i "s|get_client_endpoint = \"/panel/api/inbounds/getClientTraffics/\"|get_client_endpoint = \"/xui/API/inbounds/getClientTraffics/\"|g" app.py
-fi
+fi  
 
 read -p "Enter the WebUI port (default 5000): " webui_port
 if [ -z "$webui_port" ]; then
-    webui_port=5000
+    webui_port=5000  
 fi
 print_info "Modifying webUI.py file..."
 sed -i "s|app.run(debug=True, host='0.0.0.0', port=5000)|app.run(debug=True, host='0.0.0.0', port=$webui_port)|g" webUI.py
