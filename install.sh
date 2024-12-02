@@ -57,6 +57,8 @@ else
     print_warning "requirements.txt not found!"
 fi
 
+pip install --upgrade Flask werkzeug
+
 read -p "Do you want to convert client names to uppercase? (yes/no): " convert_to_upper
 if [[ "$convert_to_upper" == "no" || "$convert_to_upper" == "n" || "$convert_to_upper" == "NO" || "$convert_to_upper" == "N" || "$convert_to_upper" == "No" ]]; then
     print_info "Modifying bot.py file..."
