@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ translations['welcome'] }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body class="dark-mode">
+    <div class="container">
+        <div class="language-toggle">
+            <label class="switch">
+                <input type="checkbox" onchange="location = this.checked ? '{{ url_for('home', lang='fa', mode=current_mode) }}' : '{{ url_for('home', lang='en', mode=current_mode) }}'" {{ 'checked' if lang == 'fa' else '' }}>
+                <span class="slider"></span>
+            </label>
+            <span class="lang-text">{{ 'فارسی' if lang == 'fa' else 'English' }}</span>
+        </div>
+
+        <h1>{{ translations['welcome'] }}</h1>
+        <p>{{ translations['enter_email'] }}</p>
+        <form method="POST" class="email-form">
+            <input type="text" name="email_id" placeholder="Type  /  بنویسید" required>
+            <button type="submit">{{ translations['submit'] }}</button>
+        </form>
+
+        <div class="mode-toggle">
+            <label class="switch-mode">
+                <input type="checkbox" id="mode-toggle" onchange="toggleMode()" checked>
+                <span class="slider-mode"></span>
+            </label>
+            <span class="lang-text">{{ 'Dark Mode' if lang == 'en' else 'حالت شب' }}</span>
+        </div>
+
+    </div>
+
+    <script>
+        function toggleMode() {
+            const body = document.body;
+            const container = document.querySelector('.container');
+            const currentLang = '{{ lang }}';
+
+            if (body.classList.contains('dark-mode')) {
+                body.classList.replace('dark-mode', 'light-mode');
+                container.classList.replace('dark-mode', 'light-mode');
+                window.history.replaceState(null, '', `?lang=${currentLang}&mode=light`);
+            } else {
+                body.classList.replace('light-mode', 'dark-mode');
+                container.classList.replace('light-mode', 'dark-mode');
+                window.history.replaceState(null, '', `?lang=${currentLang}&mode=dark`);
+            }
+        }
+
+        window.onload = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const mode = urlParams.get('mode');
+            if (mode === 'dark' || !mode) { 
+                document.body.classList.add('dark-mode');
+                document.querySelector('.container').classList.add('dark-mode');
+            } else {
+                document.body.classList.add('light-mode');
+                document.querySelector('.container').classList.add('light-mode');
+            }
+        };
+    </script>
+
+</body>
+</html>
+
