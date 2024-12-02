@@ -1,4 +1,7 @@
 python-telegram-bot==12.8
-requests
+requests==2.26.0
 jdatetime
 python-dotenv
+jinja2
+fastapi
+flask==2.0.1
