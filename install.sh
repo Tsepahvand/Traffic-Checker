@@ -103,12 +103,14 @@ if [ ! -f "$DB_PATH" ]; then
 CREATE TABLE IF NOT EXISTS settings (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     token TEXT NOT NULL,
-    owner_id INTEGER NOT NULL
+    owner_id INTEGER NOT NULL,
+    ip INTEGER NOT NULL
 );
 EOF
 else
     print_success "Database $DB_PATH already exists."
 fi
+
 
 
 read -p "Enter the bot token: " bot_token
