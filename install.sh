@@ -103,8 +103,7 @@ if [ ! -f "$DB_PATH" ]; then
 CREATE TABLE IF NOT EXISTS settings (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     token TEXT NOT NULL,
-    owner_id INTEGER NOT NULL,
-    ip INTEGER NOT NULL
+    owner_id INTEGER NOT NULL
 );
 EOF
 else
