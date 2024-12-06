@@ -103,22 +103,14 @@ if [ ! -f "$DB_PATH" ]; then
 CREATE TABLE IF NOT EXISTS settings (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     token TEXT NOT NULL,
-    owner_id INTEGER NOT NULL,
-    ip TEXT NOT NULL
+    owner_id INTEGER NOT NULL
 );
 EOF
 else
     print_success "Database $DB_PATH already exists."
 fi
 
-public_ip=$(curl -s ipinfo.io/ip)
 
-if [ -z "$public_ip" ]; then
-    print_error "Failed to get the public IP."
-    exit 1
-else
-    print_success "Public IP is $public_ip"
-fi
 
 read -p "Enter the bot token: " bot_token
 read -p "Enter the owner ID: " owner_id
@@ -131,7 +123,7 @@ fi
 
 
 sqlite3 "$DB_PATH" <<EOF
-INSERT INTO settings (token, owner_id, ip) VALUES ('$bot_token', $owner_id, '$public_ip');
+INSERT INTO settings (token, owner_id) VALUES ('$bot_token', $owner_id);
 EOF
 print_success "Information saved."
 
