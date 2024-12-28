@@ -1,6 +1,4 @@
 python-telegram-bot==12.8
 requests
 jdatetime
-uuid
-random
-json
+
