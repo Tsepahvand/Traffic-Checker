@@ -1,3 +1,8 @@
 python-telegram-bot==12.8
+sqlite3
+requests
 jdatetime
-python-dotenv
+logging
+uuid
+random
+json
