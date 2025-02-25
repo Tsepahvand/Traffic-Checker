@@ -1,16 +1,47 @@
-version: "3.3"
+version: "3.8"
+
 services:
   bot:
     build: .
     container_name: telegram-bot
     volumes:
       - .:/app
-      - ./data:/app/data  
+      - ./data:/app/data
+    networks:
+      - bot-network
+    restart: always
+    command: python bot.py
+
+  web-ui:
+    build: .
+    container_name: web-ui
+    volumes:
+      - .:/app
+      - ./data:/app/data
     networks:
       - bot-network
     restart: always
     ports:
-      - "8001:8000"  
+      - "8002:8002"  
+    environment:
+      DB_PATH: /app/data/detail.db  
+    command: python web-ui.py
+
+  api:
+    build: .
+    container_name: api
+    volumes:
+      - .:/app
+      - ./data:/app/data
+    networks:
+      - bot-network
+    restart: always
+    ports:
+      - "7386:7386"  
+    environment:
+      DB_PATH: /app/data/detail.db  
+    command: python api.py
+
 networks:
   bot-network:
     driver: bridge
