@@ -1,4 +1,7 @@
 python-telegram-bot==12.8
 requests
 jdatetime
-
+flask
+datetime
+uvicorn==0.34.0
+fastapi

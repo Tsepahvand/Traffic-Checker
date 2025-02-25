@@ -3,10 +3,12 @@ from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, Conve
 import sqlite3
 import requests
 import jdatetime
+import re
 import logging
 import uuid
 import random
 import json
+import socket
 from datetime import datetime, timedelta
 
 logging.basicConfig(filename='log.log', filemode='a', level=logging.INFO, format='%(asctime)s-%(filename)s-%(message)s')
@@ -87,6 +89,25 @@ def get_panels():
     connection.close()
     return panels
 
+def get_panel_type():
+    connection = get_db_connection()
+    cursor = connection.cursor()
+    cursor.execute('SELECT panel_type FROM settings WHERE id = 1')  
+    result = cursor.fetchone() 
+    connection.close()
+    
+    return result[0] if result else None
+
+def get_upper_or_no():
+    connection = get_db_connection()
+    cursor = connection.cursor()
+    cursor.execute('SELECT upper FROM settings WHERE id = 1')  
+    result = cursor.fetchone() 
+    connection.close()
+    
+    return result[0] if result else None
+
+
 def get_owner():
     connection = get_db_connection()
     cursor = connection.cursor()
@@ -103,6 +124,74 @@ def get_admins():
     connection.close()
     return admins
 
+def get_ip_or_domain():
+    connection = get_db_connection()
+    cursor = connection.cursor()
+    cursor.execute('SELECT public_ip FROM settings WHERE id = 1')
+    result = cursor.fetchone()
+    connection.close()
+
+    if not result:
+        return None  
+
+    value = result[0]  
+
+    ip_pattern = r"^\d{1,3}(\.\d{1,3}){3}$"
+    
+    if re.match(ip_pattern, value):
+        return "ip", value  
+    else:
+        return "domain", value
+
+def is_port_available(port):
+    """بررسی می‌کند که آیا پورت آزاد است یا خیر."""
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        try:
+            s.bind(('0.0.0.0', port))  
+            return True 
+        except socket.error:
+            return False 
+
+def get_port():
+    connection = get_db_connection()
+    cursor = connection.cursor()
+    
+    cursor.execute("PRAGMA table_info(settings)")
+    columns = cursor.fetchall()
+    column_names = [column[1] for column in columns]
+    
+    if 'port' not in column_names:
+        connection.close()
+        port = 5000
+        
+        connection = get_db_connection()
+        cursor = connection.cursor()
+        cursor.execute("INSERT INTO settings (port) VALUES (?)", (port,))
+        connection.commit()
+        connection.close()
+        
+        return port
+    
+    cursor.execute('SELECT port FROM settings WHERE id = 1')
+    result = cursor.fetchone()
+    connection.close()
+
+    if result and result[0]:
+        port = int(result[0])  
+        if is_port_available(port):  
+            return port
+        else:  
+            return port
+    else:
+        port = 5000
+        connection = get_db_connection()
+        cursor = connection.cursor()
+        cursor.execute("UPDATE settings SET port = ? WHERE id = 1", (port,))
+        connection.commit()
+        connection.close()
+        
+        return port
+    
 # پیام‌ها
 messages = {
     'msg-main-menu': 'منوی اصلی :\nبرای لغو هر عملیات، دستور /cancel را وارد کنید.',
@@ -247,7 +336,12 @@ def check_handler(update: Update, context: CallbackContext):
 
 
 def get_client_name(update: Update, context: CallbackContext):
-    client_name = update.message.text.strip().upper()  
+    name_upper = get_upper_or_no()
+    print
+    if name_upper == 'yes':
+        client_name = update.message.text.strip().upper()  
+    else:
+       client_name = update.message.text.strip()     
     perform_check(client_name, update, context)
     return ConversationHandler.END
 
@@ -255,11 +349,18 @@ def perform_check(client_name, update: Update, context: CallbackContext):
 
     chat_id = update.message.chat_id
     panels = get_panels()
+    port = get_port()
     found = False
+    type_, public_ip = get_ip_or_domain()
+    protocol = "http" if type_ == "ip" else "https"
+    panel_type = get_panel_type()
 
     for base_url, username, password in panels:
         login_endpoint = "/login"
-        get_client_endpoint = "/panel/api/inbounds/getClientTraffics/"
+        if panel_type == 'sanaei':
+            get_client_endpoint = "/panel/api/inbounds/getClientTraffics/"
+        elif panel_type == 'alireza':
+            get_client_endpoint = "/xui/API/inbounds/getClientTraffics/"
         session = requests.Session()
 
         login_response = session.post(base_url + login_endpoint, json={"username": username, "password": password})
@@ -311,7 +412,8 @@ def perform_check(client_name, update: Update, context: CallbackContext):
                         if total_percent is not None:
                             acc_info += f"حجم باقی مانده به درصد :\n {progress_bar} {round(total_percent)}%\n"
 
-                        acc_info += f"تاریخ انقضا : {expiry_info}"
+                        acc_info += f"تاریخ انقضا : {expiry_info}\n"
+                        acc_info += f"لینک وب پنل : \n {protocol}://{public_ip}:{port}/{client_name}?lang=fa"
                         update.message.reply_text(acc_info)
                         break
             else:
@@ -530,4 +632,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-

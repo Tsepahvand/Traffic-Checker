@@ -1,0 +1,168 @@
+#!/bin/bash
+
+COMPOSE_DIR="/root/Traffic-Checker"
+
+animate_traffic_checker() {
+    local text="Traffic-Checker"
+    for ((i=0; i<${#text}; i++)); do
+        echo -n "${text:$i:1}"
+        sleep 0.1
+    done
+    echo
+}
+
+show_menu() {
+    clear
+    animate_traffic_checker
+    echo "Welcome to Traffic-Checker Menu! What do you want to do?"
+    echo "1 - Restart Script"
+    echo "2 - Change Domain/Subdomain"
+    echo "3 - Change Port"
+    echo "4 - Renew SSL"
+    echo "5 - Change Bot Token"
+    echo "0 - Exit"
+    read -p "Please choose an option (0-5): " choice
+    handle_menu_choice "$choice"
+}
+
+handle_menu_choice() {
+    clear
+    case $1 in
+        1)
+            confirm_action "restart the script" restart_script
+            ;;
+        2)
+            confirm_action "change the domain/subdomain" change_domain
+            ;;
+        3)
+            confirm_action "change the port" change_port
+            ;;
+        4)
+            confirm_action "renew the SSL certificate" renew_ssl
+            ;;
+        5)
+            confirm_action "change the bot token" change_bot_token
+            ;;
+        0)
+            echo "Exiting..."
+            exit 0
+            ;;
+        *)
+            echo "Invalid option! Please try again."
+            sleep 2
+            show_menu
+            ;;
+    esac
+}
+
+confirm_action() {
+    local action=$1
+    local callback=$2
+    read -p "Are you sure you want to $action? (y/n): " confirm
+    if [[ "$confirm" =~ ^(y|Y|yes|YES)$ ]]; then
+        $callback
+    else
+        echo "Action canceled."
+        sleep 2
+        show_menu
+    fi
+}
+
+restart_script() {
+    cd "$COMPOSE_DIR" || {
+        echo "Failed to change directory to $COMPOSE_DIR. Please check the path."
+        return_to_menu
+    }
+
+    if [[ ! -f "docker-compose.yml" && ! -f "docker-compose.yaml" ]]; then
+        echo "Error: docker-compose.yml or docker-compose.yaml not found in $COMPOSE_DIR."
+        return_to_menu
+    fi
+
+    echo "Restarting Docker containers..."
+    docker-compose restart
+    if [ $? -eq 0 ]; then
+        echo "Docker containers restarted successfully."
+    else
+        echo "Failed to restart Docker containers."
+    fi
+
+    return_to_menu
+}
+
+change_domain() {
+    read -p "Enter the new domain/subdomain: " new_domain
+    if [[ -z "$new_domain" ]]; then
+        echo "Domain cannot be empty!"
+        return_to_menu
+    fi
+
+    sqlite3 "$COMPOSE_DIR/detail.db" "UPDATE settings SET public_ip = '$new_domain' WHERE id = 1"
+    echo "Domain updated in the database."
+
+    echo "Obtaining SSL certificate for $new_domain..."
+    certbot certonly --standalone --agree-tos --non-interactive --email admin@$new_domain -d $new_domain
+    if [ $? -eq 0 ]; then
+        echo "SSL certificate obtained successfully."
+    else
+        echo "Failed to obtain SSL certificate."
+    fi
+
+    restart_script
+}
+
+change_port() {
+    while true; do
+        read -p "Enter the new port: " new_port
+        if [[ -z "$new_port" || ! "$new_port" =~ ^[0-9]+$ ]]; then
+            echo "Invalid port! Please enter a valid number."
+            continue
+        fi
+
+        if nc -z localhost "$new_port" &>/dev/null; then
+            echo "Port $new_port is already in use. Please choose another port."
+        else
+            sqlite3 "$COMPOSE_DIR/detail.db" "UPDATE settings SET port = $new_port WHERE id = 1"
+            echo "Port updated in the database."
+            restart_script
+            break
+        fi
+    done
+}
+
+renew_ssl() {
+    domain=$(sqlite3 "$COMPOSE_DIR/detail.db" "SELECT public_ip FROM settings WHERE id = 1")
+    if [[ -z "$domain" || "$domain" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+        echo "No valid domain found in the database."
+        return_to_menu
+    fi
+
+    echo "Renewing SSL certificate for $domain..."
+    certbot renew --force-renewal --cert-name "$domain"
+    if [ $? -eq 0 ]; then
+        echo "SSL certificate renewed successfully."
+    else
+        echo "Failed to renew SSL certificate."
+    fi
+
+    restart_script
+}
+
+change_bot_token() {
+    read -p "Enter the new bot token: " new_token
+    if [[ -z "$new_token" ]]; then
+        echo "Token cannot be empty!"
+        return_to_menu
+    fi
+
+    sqlite3 "$COMPOSE_DIR/detail.db" "UPDATE settings SET token = '$new_token' WHERE id = 1"
+    echo "Bot token updated in the database."
+    restart_script
+}
+
+return_to_menu() {
+    read -p "Press Enter to return to the main menu..."
+    show_menu
+}
+
+show_menu
