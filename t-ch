@@ -124,7 +124,19 @@ change_port() {
         else
             sqlite3 "$COMPOSE_DIR/detail.db" "UPDATE settings SET port = $new_port WHERE id = 1"
             echo "Port updated in the database."
-            restart_script
+
+            sed -i "s/- \"[0-9]\+:[0-9]\+\"/- \"$new_port:$new_port\"/g" "$COMPOSE_DIR/docker-compose.yml"
+            echo "Port updated in docker-compose.yml."
+
+            echo "Restarting Docker containers..."
+            docker-compose -f "$COMPOSE_DIR/docker-compose.yml" down
+            docker-compose -f "$COMPOSE_DIR/docker-compose.yml" up -d
+            if [ $? -eq 0 ]; then
+                echo "Docker containers restarted successfully."
+            else
+                echo "Failed to restart Docker containers."
+            fi
+
             break
         fi
     done
