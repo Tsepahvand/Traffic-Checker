@@ -238,6 +238,10 @@ sqlite3 "detail.db" "ALTER TABLE settings ADD COLUMN port INTEGER;"
 sqlite3 "detail.db" "UPDATE settings SET port = $webui_port;"
 print_success "Web UI port saved in the database: $webui_port"
 
+sed -i "s/\${WEBUI_PORT}/$webui_port/g" "$TRAFFIC_DIR/docker-compose.yml"
+print_success "Port updated in docker-compose.yml."
+
+
 if [[ -f "/root/Traffic-Checker/t-ch" ]]; then
     chmod +x /root/Traffic-Checker/t-ch
     echo "File /root/Traffic-Checker/t-ch is now executable."
