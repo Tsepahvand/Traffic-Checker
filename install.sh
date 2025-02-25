@@ -233,15 +233,13 @@ else
     webui_port=$(find_free_port)
     print_warning "No port specified. Using the first available port: $webui_port"
 fi
- WEBUI_PORT=$webui_port
+export WEBUI_PORT=$webui_port
 
 
 sqlite3 "detail.db" "ALTER TABLE settings ADD COLUMN port INTEGER;"
 sqlite3 "detail.db" "UPDATE settings SET port = $webui_port;"
 print_success "Web UI port saved in the database: $webui_port"
 
-sed -i "s/\${WEBUI_PORT}/$webui_port/g" "$TRAFFIC_DIR/docker-compose.yml"
-print_success "Port updated in docker-compose.yml."
 
 
 if [[ -f "/root/Traffic-Checker/t-ch" ]]; then
@@ -261,6 +259,9 @@ fi
 
 source ~/.bashrc
 echo "Applied changes to ~/.bashrc."
+
+sed -i "s/\${WEBUI_PORT}/$webui_port/g" "$TRAFFIC_DIR/docker-compose.yml"
+print_success "Port updated in docker-compose.yml."
 
 loading_animation "Running the bot with Docker Compose"
 docker-compose up --build -d || { print_error "Docker Compose failed to start."; exit 1; }
