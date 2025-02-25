@@ -233,7 +233,7 @@ else
     webui_port=$(find_free_port)
     print_warning "No port specified. Using the first available port: $webui_port"
 fi
-export WEBUI_PORT=$webui_port
+ WEBUI_PORT=$webui_port
 
 
 sqlite3 "detail.db" "ALTER TABLE settings ADD COLUMN port INTEGER;"
