@@ -1,5 +1,5 @@
-<div dir="rtl">
 # Traffic-Checker
+<div dir="rtl">
 
 ![Build Status](https://img.shields.io/badge/status-active-success.svg)
 ![GitHub License](https://img.shields.io/github/license/Tsepahvand/Traffic-Checker)
