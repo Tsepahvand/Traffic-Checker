@@ -148,7 +148,7 @@ t-ch
 ---
 
 ## 🖼️ عکس های پروژه
-![bot](https://github.com/Tsepahvand/Traffic-Checker/blob/main/pic/bot-1.png)
+![bot](https://github.com/Tsepahvand/Traffic-Checker/blob/main/pic/bot.png)
 
 ![web ui](https://github.com/Tsepahvand/Traffic-Checker/blob/main/pic/webui-1.png) 
 ![web ui](https://github.com/Tsepahvand/Traffic-Checker/blob/main/pic/webui-4.png)
