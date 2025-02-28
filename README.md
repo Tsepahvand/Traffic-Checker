@@ -1,7 +1,7 @@
 # Traffic-Checker
 <div dir="rtl">
 
-![Build Status](https://img.shields.io/badge/status-active-success.svg)
+![Build Status](https://img.shields.io/badge/status-deactive-success.svg)
 ![GitHub License](https://img.shields.io/github/license/Tsepahvand/Traffic-Checker)
 ![GitHub Stars](https://img.shields.io/github/stars/Tsepahvand/Traffic-Checker?style=social)
 
