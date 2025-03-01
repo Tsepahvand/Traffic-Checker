@@ -49,7 +49,7 @@ else
 fi
 
 REPO_URL="https://github.com/Tsepahvand/Traffic-Checker.git"
-TRAFFIC_DIR="Traffic-Checker"
+TRAFFIC_DIR="/root/Traffic-Checker"
 
 if [ -d "$TRAFFIC_DIR" ]; then
     print_warning "$TRAFFIC_DIR already exists. Removing it..."
