@@ -22,7 +22,7 @@ services:
       - bot-network
     restart: always
     ports:
-      - "${WEBUI_PORT}:8002"  
+      - "${WEBUI_PORT}:${WEBUI_PORT}"  
     environment:
       DB_PATH: /app/data/detail.db  
     command: python web-ui.py
