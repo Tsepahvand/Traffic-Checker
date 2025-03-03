@@ -5,6 +5,14 @@
 ![GitHub License](https://img.shields.io/github/license/Tsepahvand/Traffic-Checker)
 ![GitHub Stars](https://img.shields.io/github/stars/Tsepahvand/Traffic-Checker?style=social)
 
+![Python](https://img.shields.io/badge/python-%233776AB.svg?style=for-the-badge&logo=python&logoColor=white)
+![Docker](https://img.shields.io/badge/docker-%232496ED.svg?style=for-the-badge&logo=docker&logoColor=white) 
+![CSS3](https://img.shields.io/badge/css3-%231572B6.svg?style=for-the-badge&logo=css3&logoColor=white)
+![HTML5](https://img.shields.io/badge/html5-%23E34F26.svg?style=for-the-badge&logo=html5&logoColor=white)
+![Shell](https://img.shields.io/badge/shell-%234EAA25.svg?style=for-the-badge&logo=gnu-bash&logoColor=white)
+
+---
+
 ## 📌 فهرست مطالب
 - [درباره پروژه](#-درباره-پروژه)
   - [ویژگی‌ها](#-ویژگیها)
