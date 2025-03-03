@@ -190,11 +190,21 @@ get_ssl_certificate() {
         KEY_PATH="/etc/letsencrypt/live/$domain/privkey.pem"
         sqlite3 "detail.db" "UPDATE settings SET cert_path = '$CERT_PATH', key_path = '$KEY_PATH';"
         echo -e "${GREEN}Certificate paths saved in the database.${NC}"
+        
+        COMPOSE_FILE="/root/Traffic-Checker/docker-compose.yml"
+        if [[ -f "$COMPOSE_FILE" ]]; then
+            sed -i "s|/etc/letsencrypt/live/[^:]*|/etc/letsencrypt/live/$domain|g" "$COMPOSE_FILE"
+            sed -i "s|/etc/letsencrypt/archive/[^:]*|/etc/letsencrypt/archive/$domain|g" "$COMPOSE_FILE"
+            echo -e "${GREEN}Updated $COMPOSE_FILE with new domain: $domain${NC}"
+        else
+            echo -e "${RED}Error: $COMPOSE_FILE not found!${NC}"
+        fi
     else
         echo -e "${RED}Failed to obtain SSL certificate.${NC}"
         exit 1
     fi
 }
+
 
 read -p "Did you want to use a domain for the web UI? (y/n): " use_domain
 if [[ "$use_domain" =~ ^(y|Y|yes|YES)$ ]]; then
