@@ -18,11 +18,15 @@ services:
     volumes:
       - .:/app
       - ./data:/app/data
+      - /etc/letsencrypt/live/${domain}:/etc/letsencrypt/live/${domain}:ro
+      - /etc/letsencrypt/archive/${domain}:/etc/letsencrypt/archive/${domain}:ro
+
     networks:
       - bot-network
     restart: always
     ports:
-      - "${WEBUI_PORT}:${WEBUI_PORT}"  
+      - "1110:1110"  
+
     environment:
       DB_PATH: /app/data/detail.db  
     command: python web-ui.py
@@ -40,7 +44,7 @@ services:
       - "7386:7386"  
     environment:
       DB_PATH: /app/data/detail.db  
-    command: python api.py
+    command: uvicorn api:app --host 0.0.0.0 --port 7386
 
 networks:
   bot-network:
