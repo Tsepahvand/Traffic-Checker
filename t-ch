@@ -127,7 +127,7 @@ change_domain() {
     read -p "Enter the new domain/subdomain: " new_domain
     if [[ -z "$new_domain" ]]; then
         echo "Domain cannot be empty!"
-        return_to_menu  
+        return_to_menu
         return
     fi
 
@@ -138,7 +138,7 @@ change_domain() {
     certbot certonly --standalone --agree-tos --non-interactive --email admin@$new_domain -d $new_domain
     if [ $? -ne 0 ]; then
         echo "Failed to obtain SSL certificate."
-        return  
+        return
     fi
     echo "SSL certificate obtained successfully."
 
@@ -179,8 +179,8 @@ renew_ssl() {
     fi
 
     echo "Updating docker-compose.yml with renewed SSL paths..."
-    sed -i "s|/etc/letsencrypt/live/[^/]*|/etc/letsencrypt/live/$domain|g" "$COMPOSE_DIR/docker-compose.yml"
-    sed -i "s|/etc/letsencrypt/archive/[^/]*|/etc/letsencrypt/archive/$domain|g" "$COMPOSE_DIR/docker-compose.yml"
+    sed -i "s|\(/etc/letsencrypt/live/\)[^:]*:\(/etc/letsencrypt/live/\)[^:]*\(:[a-z]*\)\?|\1$domain:\2$domain\3|g" "$COMPOSE_DIR/docker-compose.yml"
+    sed -i "s|\(/etc/letsencrypt/archive/\)[^:]*:\(/etc/letsencrypt/archive/\)[^:]*\(:[a-z]*\)\?|\1$domain:\2$domain\3|g" "$COMPOSE_DIR/docker-compose.yml"
     
     echo "Docker Compose file updated with renewed SSL paths."
 
