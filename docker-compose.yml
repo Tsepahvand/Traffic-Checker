@@ -25,7 +25,7 @@ services:
       - bot-network
     restart: always
     ports:
-      - "1110:1110"  
+      - "${WEBUI_PORT}:${WEBUI_PORT}"  
 
     environment:
       DB_PATH: /app/data/detail.db  
