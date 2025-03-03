@@ -150,7 +150,7 @@ def detail(email_id):
     
     lang = request.args.get('lang', 'en')
     try:
-        fastapi_url = f"http://127.0.0.1:7386/cn/?Client={email_id}"
+        fastapi_url = f"http://api:7386/cn/?Client={email_id}"
         response = requests.get(fastapi_url)
 
         if response.status_code == 200:
