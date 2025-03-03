@@ -127,7 +127,8 @@ change_domain() {
     read -p "Enter the new domain/subdomain: " new_domain
     if [[ -z "$new_domain" ]]; then
         echo "Domain cannot be empty!"
-        return_to_menu
+        return_to_menu  
+        return
     fi
 
     sqlite3 "$COMPOSE_DIR/detail.db" "UPDATE settings SET public_ip = '$new_domain' WHERE id = 1"
@@ -135,20 +136,32 @@ change_domain() {
 
     echo "Obtaining SSL certificate for $new_domain..."
     certbot certonly --standalone --agree-tos --non-interactive --email admin@$new_domain -d $new_domain
-    if [ $? -eq 0 ]; then
-        echo "SSL certificate obtained successfully."
-    else
+    if [ $? -ne 0 ]; then
         echo "Failed to obtain SSL certificate."
+        return  
+    fi
+    echo "SSL certificate obtained successfully."
+
+    if [ ! -d "/etc/letsencrypt/live/$new_domain" ] || [ ! -d "/etc/letsencrypt/archive/$new_domain" ]; then
+        echo "SSL certificate directories were not created properly."
+        return
     fi
 
     echo "Updating docker-compose.yml with new SSL paths..."
-    sed -i "s|/etc/letsencrypt/live/[^/]*|/etc/letsencrypt/live/$new_domain|g" "$COMPOSE_DIR/docker-compose.yml"
-    sed -i "s|/etc/letsencrypt/archive/[^/]*|/etc/letsencrypt/archive/$new_domain|g" "$COMPOSE_DIR/docker-compose.yml"
-    
+    sed -i "s|\(/etc/letsencrypt/live/\)[^:]*:\(/etc/letsencrypt/live/\)[^:]*\(:[a-z]*\)\?|\1$new_domain:\2$new_domain\3|g" "$COMPOSE_DIR/docker-compose.yml"
+    sed -i "s|\(/etc/letsencrypt/archive/\)[^:]*:\(/etc/letsencrypt/archive/\)[^:]*\(:[a-z]*\)\?|\1$new_domain:\2$new_domain\3|g" "$COMPOSE_DIR/docker-compose.yml"
     echo "Docker Compose file updated with new SSL paths."
 
-    restart_script
+    echo "Restarting Docker services..."
+    docker-compose -f "$COMPOSE_DIR/docker-compose.yml" down
+    docker-compose -f "$COMPOSE_DIR/docker-compose.yml" up --build -d
+    if [ $? -eq 0 ]; then
+        echo "Docker containers restarted successfully."
+    else
+        echo "Failed to restart Docker containers."
+    fi
 }
+
 
 renew_ssl() {
     domain=$(sqlite3 "$COMPOSE_DIR/detail.db" "SELECT public_ip FROM settings WHERE id = 1")
